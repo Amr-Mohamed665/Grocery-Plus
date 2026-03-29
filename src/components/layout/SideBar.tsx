@@ -85,7 +85,7 @@ export default function ProfileNavigationMenu() {
   const handleLogout = async () => {
     try {
       await logoutMutation.mutateAsync();
-      router.push("/");
+      router.push("/login");
     } catch (error) {
       console.error("Logout failed:", error);
     }
