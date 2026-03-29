@@ -1,0 +1,74 @@
+"use client";
+
+import { useRef } from "react";
+import { CardProductC } from "@/components/common/CardProduct";
+import { ChevronRight, ChevronLeft } from "lucide-react";
+
+export default function SlideProduct({ meals }: any) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: "left" | "right") => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 320; // Approx card width + gap
+      scrollContainerRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  return (
+    <section className="mb-12 relative group/section">
+      <div className="relative flex items-center gap-2 md:gap-4 lg:gap-6">
+        {/* Left Arrow - Absolute Positioned */}
+        <button
+          onClick={() => scroll("left")}
+          className="-left-5 top-1/2 -translate-y-1/2 z-20 bg-white hover:bg-slate-50 text-[#083C5A] w-8 h-8 md:w-10 md:h-10 rounded-full shadow-md border border-slate-100 hidden md:flex items-center justify-center opacity-0 group-hover/section:opacity-100 transition-all duration-300 hover:scale-110"
+        >
+          <ChevronLeft size={24} strokeWidth={2.5} />
+        </button>
+
+        {/* Scroll Container */}
+        <div
+          ref={scrollContainerRef}
+          className="flex gap-6 overflow-x-auto pb-8 -mx-4 px-4 scrollbar-hide scroll-smooth"
+        >
+          {meals?.meals?.filter((meal: any) => 
+            !meal?.title?.toLowerCase().includes("marwa") &&
+            !meal?.brand?.toLowerCase().includes("marwa") &&
+            !meal?.vendor?.toLowerCase().includes("marwa")
+          ).map((meal: any) => {
+            const discount =
+              ((meal.price - meal.discount_price) / meal.price) * 100;
+            return (
+              <div key={meal.id} className="min-w-full sm:min-w-[304px] h-full">
+                <CardProductC
+                  product={{
+                    id: meal.id,
+                    link: meal.id,
+                    title: meal.title.replace(/Choclate/g, "Chocolate"),
+                    image: meal.image_url,
+                    price: meal.final_price,
+                    originalPrice: meal.price,
+                    rating: meal.rating,
+                    isOffer: meal.has_offer,
+                    discount: discount.toFixed(),
+                    inStock: meal.in_stock,
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Right Arrow - Absolute Positioned */}
+        <button
+          onClick={() => scroll("right")}
+          className="bg-white hover:bg-slate-50 text-[#083C5A] w-8 h-8 md:w-10 md:h-10 rounded-full shadow-md border border-slate-100 hidden md:flex items-center justify-center opacity-0 group-hover/section:opacity-100 transition-all duration-300 hover:scale-110"
+        >
+          <ChevronRight size={24} strokeWidth={2.5} />
+        </button>
+      </div>
+    </section>
+  );
+}
