@@ -3,12 +3,11 @@ import Container from "../common/Container";
 // Product images
 import Head from "@/components/common/Head";
 import { CardProductA } from "../common/CardProduct";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNewProducts } from "@/hooks/categories/useCategories";
 
 // Main component
 export default function NewProduct() {
-  const [data, setData] = useState<any>([]);
   const [category, setCategory] = useState<string>("");
   const { data: newProducts, isLoading: newProductsLoading } = useNewProducts();
 
@@ -17,17 +16,10 @@ export default function NewProduct() {
     ? [...new Set(newProducts.newProducts.map((product: any) => product.category.name))] as string[]
     : [];
 
-  useEffect(() => {
-    setData(newProducts?.newProducts);
-  }, [newProductsLoading]);
-
-  const upData = (cat: string) => {
-    const data = newProducts?.newProducts.filter(
-      (meal: any) => meal.category.name === cat,
-    );
-    setData(data);
-    setCategory(cat);
-  };
+  // Filter products by category
+  const data = category
+    ? newProducts?.newProducts?.filter((product: any) => product.category.name === category)
+    : newProducts?.newProducts;
 
   return (
     <Container className="flex flex-col gap-4 mt-9 md:mt-16 lg:mt-24">
@@ -36,10 +28,7 @@ export default function NewProduct() {
       <div className="hidden sm:flex justify-end content-stretch flex-col items-end relative shrink-0 w-full">
         <div className="content-stretch flex font-['Inter:Regular',sans-serif] font-normal items-center justify-between not-italic p-[5px] relative shrink-0 text-[18px] w-auto gap-4">
           <button
-            onClick={() => {
-              setData(newProducts?.newProducts);
-              setCategory("");
-            }}
+            onClick={() => setCategory("")}
             className={`block cursor-pointer relative shrink-0 text-[#888] ${category === "" && "text-[#014162]"} text-left whitespace-nowrap`}
           >
             All
@@ -47,7 +36,7 @@ export default function NewProduct() {
           {categories.map((cat: string) => (
             <button
               key={cat}
-              onClick={() => upData(cat)}
+              onClick={() => setCategory(cat)}
               className={`block cursor-pointer relative shrink-0 text-[#888] ${category === cat && "text-[#014162]"} text-left whitespace-nowrap`}
             >
               {cat}
