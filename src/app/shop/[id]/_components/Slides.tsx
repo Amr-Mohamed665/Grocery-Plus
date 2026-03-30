@@ -43,7 +43,19 @@ export default function Slides({ category }: any) {
           ref={scrollContainerRef}
           className="flex gap-6 overflow-x-auto pb-8 -mx-4 px-4 scrollbar-hide scroll-smooth"
         >
-          {meals?.meals.map((meal: any) => {
+          {meals?.meals
+            ?.filter((meal: any) => {
+              const title = meal.title?.toLowerCase() || '';
+              return !title.includes('marwa') && !title.includes('choclate');
+            })
+            ?.sort((a: any, b: any) => {
+              const aIsChocolate = a.title?.toLowerCase().includes('choclate');
+              const bIsChocolate = b.title?.toLowerCase().includes('choclate');
+              if (aIsChocolate && !bIsChocolate) return 1;
+              if (!aIsChocolate && bIsChocolate) return -1;
+              return 0;
+            })
+            ?.map((meal: any) => {
             return (
               <div key={meal.id} className="min-w-[calc(25%-1.125rem)] h-full">
                 <CardProductC

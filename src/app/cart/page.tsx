@@ -12,10 +12,15 @@ import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import PageTitel from "../checkout/components/PageTitel";
 
+import Loading from "@/components/common/Loading";
+
 export default function CartPage() {
   const { data: meals } = useMeals();
 
-  const { data } = useAllCart();
+  const { data, isLoading } = useAllCart();
+
+  if (isLoading) return <Loading />;
+
   return (
     <Container className="pt-12 pb-24">
       <PageTitel

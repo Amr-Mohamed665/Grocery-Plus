@@ -65,11 +65,17 @@ export default function HotDeal() {
         {isLoading ? (
           <p>Loading...</p>
         ) : (
-          data?.filter((meal: any) => 
+          data?.filter((meal: any) =>
             !meal?.title?.toLowerCase().includes("marwa") &&
             !meal?.brand?.toLowerCase().includes("marwa") &&
             !meal?.vendor?.toLowerCase().includes("marwa")
-          ).map((meal: any, index: number) => (
+          ).sort((a: any, b: any) => {
+            const aIsChocolate = a?.title?.toLowerCase().includes("choclate") || a?.title?.toLowerCase().includes("chocolate");
+            const bIsChocolate = b?.title?.toLowerCase().includes("choclate") || b?.title?.toLowerCase().includes("chocolate");
+            if (aIsChocolate && !bIsChocolate) return 1;
+            if (!aIsChocolate && bIsChocolate) return -1;
+            return 0;
+          }).map((meal: any, index: number) => (
               <CardProductA
                 key={index}
                 title={meal.title.replace(/Choclate/g, "Chocolate")}

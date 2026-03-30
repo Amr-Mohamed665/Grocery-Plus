@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ShoppingCart, Heart, Trash2, Plus, ClockFading } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ShoppingCart, Trash2, Plus, ClockFading } from "lucide-react";
 import Image from "next/image";
 import { useMealById } from "@/hooks/meals/useMeals";
 import { useAddToCart } from "@/hooks/cart/useCart";
@@ -44,6 +44,7 @@ const reviews = [
 export default function App() {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("reviews");
+  const [imgSrc, setImgSrc] = useState<string>(noImage.src);
 
   const proms = useParams().id;
 
@@ -51,8 +52,17 @@ export default function App() {
 
   const { mutate: addToCart, isPending } = useAddToCart();
 
+  // Update image source when meal data changes
+  useEffect(() => {
+    if (meal?.data?.image_url) {
+      setImgSrc(meal.data.image_url);
+    } else {
+      setImgSrc(noImage.src);
+    }
+  }, [meal?.data?.image_url]);
+
   const discount =
-    ((meal?.meal?.price - meal?.meal?.discount_price) / meal?.meal?.price) * 100;
+    ((meal?.data?.price - meal?.data?.discount_price) / meal?.data?.price) * 100;
 
   if (isLoading) {
     return (
@@ -72,7 +82,7 @@ export default function App() {
       <Container>
         <PageTitel
           track="Home / Shop /"
-          current_page={meal?.meal.title || "Product"}
+          current_page={meal?.data?.title || "Product"}
         />
       </Container>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-8 mt-4">
@@ -83,9 +93,9 @@ export default function App() {
             <div className="flex flex-col gap-4">
               <div className="flex gap-2">
                 <span className="px-2.5 py-1 bg-[linear-gradient(to_top,#01416280,#014162CC_80%)] text-white text-[10px] font-semibold rounded-tl-lg rounded-br-lg shadow-sm tracking-wide">
-                  {meal?.meal.in_stock ? "In Stock" : "Out Stock"}
+                  {meal?.data?.in_stock ? "In Stock" : "Out Stock"}
                 </span>
-                {meal?.meal.has_offer && (
+                {meal?.data?.has_offer && (
                   <span className="px-2.5 py-1 bg-[linear-gradient(to_top,#01416280,#014162CC_80%)] text-white text-[10px] font-semibold rounded-tl-lg rounded-br-lg shadow-sm tracking-wide">
                     Save {discount.toFixed()}%
                   </span>
@@ -93,10 +103,11 @@ export default function App() {
               </div>
               <div className="rounded-lg relative w-full max-w-xs mx-auto md:max-w-none md:w-[300px] lg:w-[420px] aspect-square overflow-hidden">
                 <Image
-                  src={meal?.meal.image_url || noImage}
-                  alt="Premium Organic Orange"
+                  src={imgSrc}
+                  alt={meal?.data?.title || "Product image"}
                   className="w-full h-full object-cover"
                   fill
+                  onError={() => setImgSrc(noImage.src)}
                 />
               </div>
             </div>
@@ -105,15 +116,15 @@ export default function App() {
           {/* Right: Product Details */}
           <div className="">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl text-[#014162] mb-4">
-              {meal?.meal?.title?.replace(/Choclate/g, "Chocolate")}
+              {meal?.data?.title?.replace(/Choclate/g, "Chocolate")}
             </h1>
             <div className="flex items-center gap-2 text-gray-600 mb-4">
-              <span className="line-through">£ {meal?.meal.price}</span>
+              <span className="line-through">£ {meal?.data?.price}</span>
               <span>|</span>
-              <span>{meal?.meal.size}</span>
+              <span>{meal?.data?.size}</span>
             </div>
             <p className="text-2xl sm:text-3xl mb-6">
-              £ {meal?.meal.final_price}
+              £ {meal?.data?.final_price}
             </p>
 
             <div className="bg-gray-200 inline-flex items-center gap-2 px-4 py-2 rounded mb-8">
@@ -123,19 +134,21 @@ export default function App() {
 
             {/* Quantity */}
             <div className="mb-6">
-              <label className="block mb-2">Quantity</label>
-              <div className="flex items-center gap-4 border border-gray-300 rounded-lg w-[140px]">
+              <label className="block mb-2 text-sm font-medium text-gray-700">Quantity</label>
+              <div className="flex items-center border border-gray-300 rounded-lg h-12 w-fit">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="cursor-pointer p-4 hover:bg-gray-100"
+                  className="cursor-pointer h-12 w-12 flex items-center justify-center hover:bg-gray-100 rounded-l-lg transition-colors"
                 >
-                  <Trash2 className="w-5 h-5" />
+                  <span className="text-xl font-medium">−</span>
                 </button>
-                <span className="px-4">{quantity}</span>
+                <span className="w-16 text-center font-semibold text-lg select-none">
+                  {quantity}
+                </span>
                 <button
-                  disabled={meal?.meal.stock_quantity < quantity + 1}
+                  disabled={(meal?.data?.stock_quantity || 0) < quantity + 1}
                   onClick={() => setQuantity(quantity + 1)}
-                  className="cursor-pointer p-4 hover:bg-gray-100"
+                  className="cursor-pointer h-12 w-12 flex items-center justify-center hover:bg-gray-100 rounded-r-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <Plus className="w-5 h-5" />
                 </button>
@@ -145,11 +158,11 @@ export default function App() {
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3">
               <button
-                disabled={meal?.meal.stock_quantity < 1 || isPending}
+                disabled={(meal?.data?.stock_quantity || 0) < 1 || isPending}
                 onClick={() => {
-                  if (meal?.meal.id) {
+                  if (meal?.data?.id) {
                     addToCart(
-                      { meal_id: meal.meal.id, quantity },
+                      { meal_id: meal?.data?.id, quantity },
                       {
                         onSuccess: () => {
                           toast.success("Added to cart!");
@@ -164,12 +177,9 @@ export default function App() {
                 className="cursor-pointer bg-[#014162] text-white px-6 py-4 rounded-lg flex items-center justify-center gap-2 hover:bg-[#014162]/80 disabled:opacity-50 disabled:cursor-not-allowed min-w-[160px]"
               >
                 <ShoppingCart className="w-5 h-5" />
-                {isPending ? "Adding..." : meal?.meal.stock_quantity < 1 ? "Out of Stock" : "Add To Cart"}
+                {isPending ? "Adding..." : (meal?.data?.stock_quantity || 0) < 1 ? "Out of Stock" : "Add To Cart"}
               </button>
-              <button className="cursor-pointer sm:flex-none bg-gray-300 text-gray-700 px-6 py-4 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-400 min-w-[160px]">
-                <Heart className="w-5 h-5" />
-                Add To Favourite
-              </button>
+
             </div>
           </div>
         </div>
@@ -251,19 +261,19 @@ export default function App() {
                   About This Product
                 </h2>
                 <p className="text-gray-600 leading-relaxed text-base">
-                  {meal?.meal.description}
+                  {meal?.data?.description}
                 </p>
               </div>
 
               {/* Features */}
-              {meal?.meal.features && (
+              {meal?.data?.features && (
                 <div>
                   <h3 className="text-lg font-semibold text-[#014162] mb-3">
                     Key Features
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {meal.meal.features
-                      .split(",")
+                    {meal?.data?.features
+                      ?.split(",")
                       .map((f: string, i: number) => (
                         <span
                           key={i}
@@ -279,21 +289,21 @@ export default function App() {
               {/* Details Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
-                  { label: "Brand", value: meal?.meal.brand },
-                  { label: "Size / Weight", value: meal?.meal.size },
-                  { label: "Includes", value: meal?.meal.includes },
+                  { label: "Brand", value: meal?.data?.brand },
+                  { label: "Size / Weight", value: meal?.data?.size },
+                  { label: "Includes", value: meal?.data?.includes },
                   {
                     label: "Category",
-                    value: meal?.meal.category?.name,
+                    value: meal?.data?.category?.name,
                   },
                   {
                     label: "Subcategory",
-                    value: meal?.meal.subcategory?.name,
+                    value: meal?.data?.subcategory?.name,
                   },
                   {
                     label: "Expiry Date",
-                    value: meal?.meal.expiry_date
-                      ? new Date(meal.meal.expiry_date).toLocaleDateString(
+                    value: meal?.data?.expiry_date
+                      ? new Date(meal?.data?.expiry_date).toLocaleDateString(
                           "en-GB",
                           { day: "numeric", month: "long", year: "numeric" },
                         )
@@ -319,13 +329,13 @@ export default function App() {
               </div>
 
               {/* How to Use */}
-              {meal?.meal.how_to_use && (
+              {meal?.data?.how_to_use && (
                 <div className="p-5 bg-amber-50 border border-amber-200 rounded-xl">
                   <h3 className="text-lg font-semibold text-amber-800 mb-2">
                     🍽️ How to Use
                   </h3>
                   <p className="text-amber-700 leading-relaxed">
-                    {meal.meal.how_to_use}
+                    {meal?.data?.how_to_use}
                   </p>
                 </div>
               )}
@@ -344,12 +354,12 @@ export default function App() {
                       Product Facts
                     </p>
                     <h3 className="text-xl font-extrabold leading-tight">
-                      {meal?.meal?.title?.replace(/Choclate/g, "Chocolate") ?? "—"}
+                      {meal?.data?.title?.replace(/Choclate/g, "Chocolate") ?? "—"}
                     </h3>
                     <p className="text-sm text-white/70 mt-1">
                       Serving size:{" "}
                       <span className="text-white font-medium">
-                        {meal?.meal?.title?.replace(/Choclate/g, "Chocolate") || "Product"}
+                        {meal?.data?.title?.replace(/Choclate/g, "Chocolate") || "Product"}
                       </span>
                     </p>
                   </div>
@@ -363,7 +373,7 @@ export default function App() {
                       <div className="flex items-center gap-1">
                         <span className="text-yellow-400 text-sm">★</span>
                         <span className="font-bold text-gray-800">
-                          {meal?.meal.rating ?? "—"}
+                          {meal?.data?.rating ?? "—"}
                         </span>
                         <span className="text-gray-400 text-xs">/ 5</span>
                       </div>
@@ -372,12 +382,12 @@ export default function App() {
                       <div
                         className="bg-yellow-400 h-1.5 rounded-full"
                         style={{
-                          width: `${((meal?.meal.rating ?? 0) / 5) * 100}%`,
+                          width: `${((meal?.data?.rating ?? 0) / 5) * 100}%`,
                         }}
                       />
                     </div>
                     <p className="text-xs text-gray-400 mt-1.5">
-                      {meal?.meal.rating_count ?? 0} verified reviews
+                      {meal?.data?.rating_count ?? 0} verified reviews
                     </p>
                   </div>
 
@@ -385,21 +395,21 @@ export default function App() {
                   {[
                     {
                       label: "Units Sold",
-                      value: meal?.meal.sold_count ?? "—",
+                      value: meal?.data?.sold_count ?? "—",
                       icon: "📦",
                       color: "text-gray-800",
                     },
                     {
                       label: "Stock Quantity",
-                      value: meal?.meal.stock_quantity ?? "—",
+                      value: meal?.data?.stock_quantity ?? "—",
                       icon: "🏪",
                       color: "text-gray-800",
                     },
                     {
                       label: "Availability",
-                      value: meal?.meal.in_stock ? "In Stock" : "Out of Stock",
-                      icon: meal?.meal.in_stock ? "✅" : "❌",
-                      color: meal?.meal.in_stock
+                      value: meal?.data?.in_stock ? "In Stock" : "Out of Stock",
+                      icon: meal?.data?.in_stock ? "✅" : "❌",
+                      color: meal?.data?.in_stock
                         ? "text-green-600"
                         : "text-red-500",
                     },
@@ -421,22 +431,22 @@ export default function App() {
                   ))}
 
                   {/* Offer block */}
-                  {meal?.meal.has_offer && (
+                  {meal?.data?.has_offer && (
                     <div className="px-5 py-4 bg-emerald-50 border-t border-emerald-100">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
                           Active Offer
                         </span>
                         <span className="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                          {meal.meal.offer_title}
+                          {meal?.data?.offer_title}
                         </span>
                       </div>
                       <div className="flex items-end gap-2">
                         <span className="text-xl font-extrabold text-emerald-700">
-                          £{meal.meal.final_price}
+                          £{meal?.data?.final_price}
                         </span>
                         <span className="text-sm text-gray-400 line-through mb-0.5">
-                          £{meal.meal.price}
+                          £{meal?.data?.price}
                         </span>
                       </div>
                     </div>
@@ -455,7 +465,7 @@ export default function App() {
                     {
                       icon: "🏷️",
                       label: "Brand",
-                      value: meal?.meal.brand,
+                      value: meal?.data?.brand,
                       bg: "bg-blue-50",
                       border: "border-blue-100",
                       iconBg: "bg-blue-100",
@@ -463,7 +473,7 @@ export default function App() {
                     {
                       icon: "📦",
                       label: "Package Includes",
-                      value: meal?.meal.includes,
+                      value: meal?.data?.includes,
                       bg: "bg-violet-50",
                       border: "border-violet-100",
                       iconBg: "bg-violet-100",
@@ -471,8 +481,8 @@ export default function App() {
                     {
                       icon: "📅",
                       label: "Best Before",
-                      value: meal?.meal.expiry_date
-                        ? new Date(meal.meal.expiry_date).toLocaleDateString(
+                      value: meal?.data?.expiry_date
+                        ? new Date(meal?.data?.expiry_date).toLocaleDateString(
                             "en-GB",
                             { day: "numeric", month: "long", year: "numeric" },
                           )
@@ -484,7 +494,7 @@ export default function App() {
                     {
                       icon: "🌿",
                       label: "Key Features",
-                      value: meal?.meal.features,
+                      value: meal?.data?.features,
                       bg: "bg-green-50",
                       border: "border-green-100",
                       iconBg: "bg-green-100",
@@ -492,7 +502,7 @@ export default function App() {
                     {
                       icon: "🗂️",
                       label: "Category",
-                      value: meal?.meal.category?.name,
+                      value: meal?.data?.category?.name,
                       bg: "bg-gray-50",
                       border: "border-gray-100",
                       iconBg: "bg-gray-100",
@@ -500,7 +510,7 @@ export default function App() {
                     {
                       icon: "⚖️",
                       label: "Size / Weight",
-                      value: meal?.meal.size,
+                      value: meal?.data?.size,
                       bg: "bg-cyan-50",
                       border: "border-cyan-100",
                       iconBg: "bg-cyan-100",
@@ -530,7 +540,7 @@ export default function App() {
                 </div>
 
                 {/* Preparation Instructions */}
-                {meal?.meal.how_to_use && (
+                {meal?.data?.how_to_use && (
                   <div className="p-5 bg-linear-to-r from-[#014162]/5 to-[#014162]/10 border border-[#014162]/15 rounded-2xl">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-lg">🍽️</span>
@@ -539,7 +549,7 @@ export default function App() {
                       </h3>
                     </div>
                     <p className="text-gray-600 leading-relaxed text-sm">
-                      {meal.meal.how_to_use}
+                      {meal?.data?.how_to_use}
                     </p>
                   </div>
                 )}

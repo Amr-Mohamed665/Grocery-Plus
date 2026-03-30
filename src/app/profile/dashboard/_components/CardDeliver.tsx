@@ -4,6 +4,9 @@ import { ShoppingCart, ChevronRight, Calendar } from "lucide-react";
 // Next
 import Link from "next/link";
 
+// Hooks
+import { useAllCart } from "@/hooks/cart/useCart";
+
 // Types
 import { DashboardData } from "@/lib/types/dashboard";
 
@@ -12,6 +15,15 @@ type CardDeliverProps = {
 };
 
 export default function CardDeliver({ dashboardData }: CardDeliverProps) {
+  const { data: cartData } = useAllCart();
+  
+  // Get actual cart items count and total from cart API
+  const cartItemsCount = cartData?.cart?.items?.length || 0;
+  const subtotal = Number(cartData?.cart?.subtotal || 0);
+  const tax = Number(cartData?.cart?.tax || 0);
+  const shipping = cartItemsCount > 0 ? 25 : 0;
+  const orderTotal = subtotal + shipping + tax;
+  
   // this logic because the last_updated is not a date it saved as a string
   const currentCart = dashboardData?.overview?.current_cart;
   let timeDisplay = "0 mins";
@@ -49,14 +61,14 @@ export default function CardDeliver({ dashboardData }: CardDeliverProps) {
         <div className="items flex gap-4 bg-[#F7FCFF] rounded-[10px] min-w-70.5 p-2 justify-between items-center px-3 shadow-[0px_2px_4px_0px_#01416240]">
           <div className="flex flex-col gap-1  ">
             <p className="font-normal text-[16px] leading-[19.2px]">
-              {currentCart?.items_count || "0"} items in cart
+              {cartItemsCount} items in cart
             </p>
             <p className="font-normal text-[12px] leading-4.5">
               Last updated: {timeDisplay} ago
             </p>
           </div>
           <p className="font-inter font-normal text-[16px] leading-[19.2px]">
-            £ {dashboardData?.overview?.current_cart?.total}{" "}
+            £ {orderTotal.toFixed(2)}
           </p>
         </div>
         <Link

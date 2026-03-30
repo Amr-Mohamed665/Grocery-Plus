@@ -151,6 +151,7 @@ export default function Nav() {
             <Search className="text-white size-5" />
           </button>
         </form>
+
         <Link
           href="/cart"
           className="flex gap-2 items-center cursor-pointer group text-[#0e1112] hover:text-[#014162] transition-colors font-medium text-sm"

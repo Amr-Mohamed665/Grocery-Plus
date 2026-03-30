@@ -12,12 +12,12 @@ import { useMeals } from "@/hooks/meals/useMeals";
 // dynamic data
 const categories = [
   { strCategory: "All" },
-  { strCategory: "Drinks" },
   { strCategory: "Vegetables" },
   { strCategory: "Fruits" },
   { strCategory: "Meat & Poultry" },
   { strCategory: "Dairy Products" },
   { strCategory: "Bakery" },
+  { strCategory: "Drinks" },
 ];
 
 function CategoryContent() {

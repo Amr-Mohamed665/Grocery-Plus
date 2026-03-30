@@ -47,6 +47,7 @@ export function CardProductA({
 
   return (
     <div className="bg-white w-full sm:w-[225px] flex flex-col h-full items-start border border-slate-200 hover:border-[#014162]/30 hover:shadow-xl transition-all duration-300 p-4 relative rounded-xl group">
+
       <div className="relative w-full h-[180px] bg-slate-50/50 rounded-xl overflow-hidden flex items-center justify-center p-4 mb-4 transition-transform duration-500 group-hover:scale-[1.03]">
         <Image
           alt={title || "Product image"}
@@ -152,6 +153,7 @@ export function CardProductC({ product }: any) {
 
   return (
     <div className="bg-white rounded-2xl min-h-[426px] p-4 border border-slate-200 hover:shadow-xl transition-all duration-300 group flex flex-col h-full relative">
+
       {/* Badges Container */}
       <div className="flex gap-1.5 items-start">
         {!inStock && (

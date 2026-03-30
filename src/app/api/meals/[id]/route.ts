@@ -29,7 +29,17 @@ export async function GET(
 
     const data = await res.json();
 
-    const response = NextResponse.json({ meal: data.data });
+    // Handle both possible API response formats: { data: meal } or directly meal
+    const mealData = data?.data || data;
+
+    if (!mealData) {
+      return NextResponse.json(
+        { message: "Meal not found" },
+        { status: 404 },
+      );
+    }
+
+    const response = NextResponse.json({ meal: mealData });
 
     return response;
   } catch (error) {

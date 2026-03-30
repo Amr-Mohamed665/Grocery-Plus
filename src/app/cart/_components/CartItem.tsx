@@ -1,33 +1,28 @@
+"use client";
 import { Trash2, Minus, Plus } from "lucide-react";
 import Image from "next/image";
 import noImage from "@/assets/no-image.jpg";
 import { useUpdateCart, useDeleteFromCart } from "@/hooks/cart/useCart";
-import { useState } from "react";
 
 export default function CartItem({ product }: any) {
   const { mutate: updateCart, isPending: isUpdating } = useUpdateCart();
   const { mutate: deleteCartItem, isPending: isDeleting } = useDeleteFromCart();
-  const [error, setError] = useState(false);
 
   const increment = () => {
     if (product?.meal?.id) {
-      updateCart({ mealId: product.id, quantity: product.quantity + 1 });
+      updateCart({ mealId: String(product.meal.id), quantity: product.quantity + 1 });
     }
   };
 
   const decrement = () => {
-    if (product.quantity === 11) {
-      setError(true);
-    }
-
     if (product?.meal?.id && product.quantity > 1) {
-      updateCart({ mealId: product.id, quantity: product.quantity - 1 });
+      updateCart({ mealId: String(product.meal.id), quantity: product.quantity - 1 });
     }
   };
 
   const handleDelete = () => {
     if (product?.meal?.id) {
-      deleteCartItem(product.id);
+      deleteCartItem(String(product.meal.id));
     }
   };
 

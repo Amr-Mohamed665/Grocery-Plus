@@ -1,23 +1,22 @@
-import PageTitel from "../components/PageTitel";
+"use client";
+
 import ProgressBar from "./components/ProgressBar";
 import Info from "./components/Info";
-import SpecialNotes from "./components/SpecialNotes";
-import Cta from "../components/Cta";
-import Container from "@/components/common/Container";
+import Loading from "@/components/common/Loading";
+import { useAllCart } from "@/hooks/cart/useCart";
 
 export default function Home() {
+  const { isLoading } = useAllCart();
+
+  if (isLoading) return <Loading />;
+
   return (
     <>
-      <Container>
-        <PageTitel
-          track="Home/ Fresh Products/ Cart/"
-          current_page="Checkout (shipping)"
-        />
-      </Container>
+      <div className="max-w-[1150px] mx-auto px-4 py-4">
+        <h1 className="font-medium text-lg lg:text-xl">Checkout (shipping)</h1>
+      </div>
       <ProgressBar />
       <Info />
-      <SpecialNotes />
-      <Cta text="Continue Checkout" link="/payment" />
     </>
   );
 }

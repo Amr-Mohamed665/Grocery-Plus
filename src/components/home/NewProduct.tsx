@@ -45,12 +45,12 @@ export default function NewProduct() {
         </div>
       </div>
       <div className="flex gap-5 items-center justify-center flex-wrap">
-        {data?.filter((product: any) => 
+        {data?.filter((product: any) =>
           !product?.title?.toLowerCase().includes("marwa") &&
           !product?.brand?.toLowerCase().includes("marwa") &&
           !product?.vendor?.toLowerCase().includes("marwa") &&
-          !product?.title?.toLowerCase().includes("hot chocolate") &&
-          !product?.title?.toLowerCase().includes("hot choclate")
+          !product?.title?.toLowerCase().includes("chocolate") &&
+          !product?.title?.toLowerCase().includes("choclate")
         ).map((product: any) => (
           <CardProductA
             key={product.id}
